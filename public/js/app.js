@@ -1,6 +1,10 @@
+/*
+  eslint-disable react/prefer-stateless-function, react/jsx-boolean-value,
+  no-undef, jsx-a11y/label-has-for, react/jsx-first-prop-new-line
+*/
 class TimersDashboard extends React.Component {
   state = {
-    timers: [],
+    timers: []
   };
 
   componentDidMount() {
@@ -8,87 +12,74 @@ class TimersDashboard extends React.Component {
     this.loadInterval = setInterval(this.loadTimersFromServer, 5000);
   }
 
-  componentWillUnmount() {
-    clearInterval(this.loadInterval);
-  }
-
   loadTimersFromServer = () => {
-    
-    client.getTimers( serverTimers => {
-        this.setState({ timers: serverTimers })
-    }
-    );
+    client.getTimers(serverTimers => this.setState({ timers: serverTimers }));
   };
 
   handleTrashClick = timerId => {
-    this.deleteTimer(timerId)
-  }
-
-  handleStartClick = (timerId) => {
-    this.startTimer(timerId);
-  }
-
-  handleStopClick = (timerId) => {
-    this.stopTimer(timerId);
-  }
-
-  deleteTimer = timerId => {
-    this.setState({
-      timers: this.state.timers.filter( timer => timer.id !== timerId )
-    });
-
-    client.deleteTimer(timerId)
-  }
-
-  startTimer = (timerId) => {
-    const now = Date.now();
-    this.setState({
-      timers: this.state.timers.map( timer => {
-        if(timer.id === timerId) {
-          return Object.assign({}, timer, {
-            runningSince: now
-          })
-        } else {
-          return timer;
-        }
-      })
-    });
-
-    client.startTimer(
-      { id: timerId, start: now }
-    )
+    this.deleteTimer(timerId);
   };
 
-  stopTimer = (timerId) => {
-    const now = Date.now();
+  handleStartClick = timerId => {
+    this.startTimer(timerId);
+  };
 
-    this.setState({
-      timers: this.state.timers.map(timer => {
-        if(timer.id === timerId) {
-          const lastElapsed = now - timer.runningSince;
-          return Object.assign({}, timer, {
-            elapsed: timer.elapsed + lastElapsed,
-            runningSince: null
-          })
-        } else {
-          return timer;
-        }
-      })
-    })
-
-    client.stopTimer(
-      { id: timerId, stop: now}
-    )
-  }
+  handleStopClick = timerId => {
+    this.stopTimer(timerId);
+  };
 
   handleCreateFormSubmit = timer => {
     this.createTimer(timer);
-    
-    client.createTimer(timer)
   };
 
   handleEditFormSubmit = attrs => {
     this.updateTimer(attrs);
+  };
+
+  deleteTimer = timerId => {
+    this.setState({
+      timers: this.state.timers.filter(timer => timer.id !== timerId)
+    });
+
+    client.deleteTimer({ id: timerId });
+  };
+
+  startTimer = timerId => {
+    const now = Date.now();
+
+    this.setState({
+      timers: this.state.timers.map(timer => {
+        if (timer.id === timerId) {
+          return Object.assign({}, timer, {
+            runningSince: now
+          });
+        } else {
+          return timer;
+        }
+      })
+    });
+
+    client.startTimer({ id: timerId, start: now });
+  };
+
+  stopTimer = timerId => {
+    const now = Date.now();
+
+    this.setState({
+      timers: this.state.timers.map(timer => {
+        if (timer.id === timerId) {
+          const lastElapsed = now - timer.runningSince;
+          return Object.assign({}, timer, {
+            elapsed: timer.elapsed + lastElapsed,
+            runningSince: null
+          });
+        } else {
+          return timer;
+        }
+      })
+    });
+
+    client.stopTimer({ id: timerId, stop: now });
   };
 
   createTimer = timer => {
@@ -96,6 +87,8 @@ class TimersDashboard extends React.Component {
     this.setState({
       timers: this.state.timers.concat(t)
     });
+
+    client.createTimer(t);
   };
 
   updateTimer = attrs => {
@@ -112,7 +105,7 @@ class TimersDashboard extends React.Component {
       })
     });
 
-    client.updateTimer(attrs)
+    client.updateTimer(attrs);
   };
 
   render() {
@@ -245,7 +238,6 @@ class EditableTimer extends React.Component {
 }
 
 class Timer extends React.Component {
-
   componentDidMount() {
     this.forceUpdateInterval = setInterval(() => this.forceUpdate(), 50);
   }
@@ -255,19 +247,22 @@ class Timer extends React.Component {
   }
 
   handleTrashClick = () => {
-    this.props.onTrashClick(this.props.id)
-  }
+    this.props.onTrashClick(this.props.id);
+  };
 
   handleStartClick = () => {
-    this.props.onStartClick(this.props.id)
-  }
+    this.props.onStartClick(this.props.id);
+  };
 
   handleStopClick = () => {
-    this.props.onStopClick(this.props.id)
-  }
+    this.props.onStopClick(this.props.id);
+  };
 
   render() {
-    const elapsedString = helpers.renderElapsedString(this.props.elapsed, this.props.runningSince);
+    const elapsedString = helpers.renderElapsedString(
+      this.props.elapsed,
+      this.props.runningSince
+    );
     return (
       <div className="ui centered card">
         <div className="content">
@@ -283,7 +278,10 @@ class Timer extends React.Component {
             >
               <i className="edit icon" />
             </span>
-            <span className="right floated trash icon" onClick={this.handleTrashClick}>
+            <span
+              className="right floated trash icon"
+              onClick={this.handleTrashClick}
+            >
               <i className="trash icon" />
             </span>
           </div>
@@ -301,19 +299,24 @@ class Timer extends React.Component {
 class TimerActionButton extends React.Component {
   render() {
     if (this.props.timerIsRunning) {
-      return(
-        <div className="ui bottom attached red basic button" onClick={this.props.onStopClick}>
+      return (
+        <div
+          className="ui bottom attached red basic button"
+          onClick={this.props.onStopClick}
+        >
           Stop
         </div>
-      )
+      );
     } else {
-      return(
-        <div className="ui bottom attached green basic button" onClick={this.props.onStartClick}>
+      return (
+        <div
+          className="ui bottom attached green basic button"
+          onClick={this.props.onStartClick}
+        >
           Start
         </div>
-      )
+      );
     }
-
   }
 }
 
